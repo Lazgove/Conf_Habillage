@@ -5,6 +5,7 @@ import os
 import time
 import pymiere
 from pymiere import wrappers
+from pymiere import Time
 
 
 def find_overlays_png(folder_path):
@@ -96,13 +97,29 @@ def pr_edits():
   fps = 1 / (float(project.activeSequence.timebase) / wrappers.TICKS_PER_SECONDS)
   print("Sequence as a framerate of {} fps".format(fps))
 
+
+  overlays_infos = [20, 40]
+
+  start_time = Time()
+  start_time.seconds = overlays_infos[0]
+
+  end_time = Time()
+  end_time.seconds = overlays_infos[1]
+
   # Select the first video clip in the Timeline
+
+  item_name = "sdf.png"
+
+  names = [list(project.rootItem.children)[i].name for i in range(0, len(list(project.rootItem.children)))]
+
   clips[0].setSelected(True, True)
-  item = project.rootItem.children[2]
-  item.setInPoint(5, 1)
-  item.setOutPoint(100, 1)
-  print(item)
+  item = project.rootItem.children[list(names).index(item_name)]
   project.activeSequence.videoTracks[1].insertClip(item, 0)
+  clips_names = [list(project.activeSequence.videoTracks[1].clips)[i].name for i in range(0, len(list(project.activeSequence.videoTracks[1].clips)))]
+
+  project.activeSequence.videoTracks[1].clips[clips_names.index(item_name)].start = start_time
+  project.activeSequence.videoTracks[1].clips[clips_names.index(item_name)].end = end_time
+
 
 
 
