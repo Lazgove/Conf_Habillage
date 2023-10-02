@@ -7,31 +7,29 @@ import pymiere
 from pymiere import wrappers
 from pymiere import Time
 
+overlay_types_list = ["no_video_1", "no_video_2", "no_video_3", "no_video_4", "no_video_5", "no_video_6", "small_1",
+                      "small_2", "small_3", "small_4", "small_5", "small_6", "medium_1", "medium_2", "medium_3",
+                      "medium_4", "medium_5", "medium_6", "large_1", "large_2", "large_3", "large_4", "large_5",
+                      "large_6"]
 
-def find_overlays_png(folder_path):
+
+def create_overlays_png(overlay_background_path, folder_path, edit_name):
+
+  overlay_background = cv2.imread(overlay_background_path)
+  overlays_alpha = []
 
   # Check if the folder exists
   if os.path.exists(folder_path):
-    # Use listdir to get a list of items in the folder
-    items = os.listdir(folder_path)
 
-    # You can filter out specific items if needed, for example, only files:
-    files = [item for item in items if os.path.isfile(os.path.join(folder_path, item))]
+    for overlay_template in overlay_types_list:
+      overlay = cv2.imread(overlay_template, cv2.IMREAD_GRAYSCALE)
+      overlay_img = cv2.addWeighted(overlay_background, 1.0, overlay, 1.0, 0)
+      overlay_path = folder_path + "/" + str(overlay_template) + edit_name
+      cv2.imwrite(overlay_path, overlay_img)
+      overlays_alpha.append(overlay_path)
 
-    # Or only directories:
-    directories = [item for item in items if os.path.isdir(os.path.join(folder_path, item))]
+    return overlays_alpha
 
-    # Print the list of items, files, and directories
-    print("All items in the folder:")
-    print(items)
-
-    print("\nOnly files in the folder:")
-    print(files)
-
-    print("\nOnly directories in the folder:")
-    print(directories)
-
-    return files
   else:
     print(f"The folder {folder_path} does not exist.")
 
@@ -48,7 +46,6 @@ def find_overlays_placement():
   # Open the video file.
   video_capture = cv2.VideoCapture("video.mp4")
 
-  overlay = find_which_overlay()
   start_frame = 1
   end_frame = 1
   overlays = []
@@ -74,7 +71,7 @@ def find_overlays_placement():
   video_capture.release()
 
 
-def pr_edits():
+def pr_edits(overlay_name, overlay_infos):
   # Check for an open project
   project_opened, sequence_active = wrappers.check_active_sequence(crash=False)
   if not project_opened:
@@ -97,14 +94,11 @@ def pr_edits():
   fps = 1 / (float(project.activeSequence.timebase) / wrappers.TICKS_PER_SECONDS)
   print("Sequence as a framerate of {} fps".format(fps))
 
-
-  overlays_infos = [20, 40]
-
   start_time = Time()
-  start_time.seconds = overlays_infos[0]
+  start_time.seconds = overlay_infos[0]
 
   end_time = Time()
-  end_time.seconds = overlays_infos[1]
+  end_time.seconds = overlay_infos[1]
 
   # Select the first video clip in the Timeline
 
@@ -122,14 +116,9 @@ def pr_edits():
 
 
 
-
-def main():
-  # overlays_images = find_overlays_png(path)
-  # overlays_infos = find_overlays_placement()
-  pr_edits()
-
-
-
+def main(overlay_path):
+  overlays = find_overlays_png(overlay_path)
+  pr_edits(overlay_name, overlay_infos)
 
 
 if __name__ == "__main__":
