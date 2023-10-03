@@ -67,6 +67,7 @@ def find_overlays_placement():
       overlays.append([overlay, (start_frame, end_frame)])
       start_frame = current_frame_number + 1
 
+
   # Release the video capture.
   video_capture.release()
 
