@@ -39,8 +39,19 @@ def create_overlays_png(overlay_background_path, folder_path, edit_name):
 def count_boxes_in_image():
   pass
 
+def find_which_overlay(image, current_overlay, overlay_template):
+  if np.mean(image + current_overlay) < 10:
+    return current_overlay
+  else:
+    for overlay in overlay_template:
+      if np.mean(image + overlay) < 10:
+        return overlay
+      else:
+        continue
+  return []
 
-def find_overlays_placement():
+
+def find_overlays_placement(overlay_template):
   """Detects black boxes in a grayscale video frame by frame."""
 
   # Open the video file.
@@ -49,18 +60,19 @@ def find_overlays_placement():
   start_frame = 1
   end_frame = 1
   overlays = []
-
+  current_overlay = overlay_template[0]
   # Loop over the video frames.
+  current_frame_number = 0
   while True:
     # Capture the next frame.
     ret, frame = video_capture.read()
-
+    current_frame_number += 1
     # If there is no more frame, then break out of the loop.
     if not ret:
       break
 
     # Detect black boxes in the frame.
-    temp_overlay = find_which_overlay(frame)
+    temp_overlay = find_which_overlay(frame, current_overlay, overlay_template)
     if overlay != temp_overlay:
       overlay = temp_overlay
       end_frame = current_frame_number
